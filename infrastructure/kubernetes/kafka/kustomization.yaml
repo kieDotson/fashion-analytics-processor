@@ -7,3 +7,4 @@ resources:
   - topics/fashion-products.yaml
   - topics/fashion-trends.yaml
   - topics/fashion-recommendations.yaml
+  - metrics/kafka-metrics.yaml

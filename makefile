@@ -53,6 +53,7 @@ setup-storage-class: ## Set up storage class for Kafka persistent volumes
 	@echo "Storage class created successfully"
 
 deploy-kafka: setup-storage-class ## Deploy Kafka cluster
+	kubectl apply -f infrastructure/kubernetes/kafka/metrics/kafka-metrics.yaml
 	kubectl apply -f infrastructure/kubernetes/kafka/kafka-cluster.yaml
 	@echo "Waiting for Kafka cluster to be ready (this may take up to 20 minutes)..."
 	@echo "You can check progress with: kubectl get pods -n $(KAFKA_NAMESPACE)"

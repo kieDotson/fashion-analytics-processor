@@ -7,8 +7,8 @@ metadata:
   namespace: fashion-analytics
 spec:
   kafka:
-    version: 3.9.0  # Ensure this is a supported version
-    replicas: 3  # Production-grade redundancy with 3 brokers
+    version: 3.9.0  
+    replicas: 1  # Production-grade redundancy would have 3 brokers
     listeners:
       - name: plain
         port: 9092
@@ -22,11 +22,11 @@ spec:
           bootstrap:
             nodePort: 30092
     config:
-      offsets.topic.replication.factor: 3
-      transaction.state.log.replication.factor: 3
-      transaction.state.log.min.isr: 2
-      default.replication.factor: 3
-      min.insync.replicas: 2
+      offsets.topic.replication.factor: 1 # use 3 for prod
+      transaction.state.log.replication.factor: 1 # use 3 for prod
+      transaction.state.log.min.isr: 1 # use 2 for prod
+      default.replication.factor: 1 #use 3 for prod
+      min.insync.replicas: 1 # use 2 for prod
       inter.broker.protocol.version: "3.9"
       # Memory optimization settings
       log.cleaner.threads: 1
@@ -44,11 +44,8 @@ spec:
       -Xms: "512m"
       -Xmx: "512m"
     storage:
-      # Using persistent storage with moderate size
-      type: persistent-claim
-      size: 2Gi
-      deleteClaim: true
-      class: standard
+      # For production use persistent storage with moderate size(2gi), a deleteClaim, and standard class
+      type: ephemeral
     metricsConfig:
       type: jmxPrometheusExporter
       valueFrom:
@@ -56,7 +53,7 @@ spec:
           name: kafka-metrics
           key: kafka-metrics-config.yml
   zookeeper:
-    replicas: 3  # Production-grade ZooKeeper ensemble
+    replicas: 1  # Production-grade ZooKeeper ensemble would be 3
     resources:
       requests:
         memory: 256Mi
@@ -68,10 +65,7 @@ spec:
       -Xms: "256m"
       -Xmx: "256m"
     storage:
-      type: persistent-claim
-      size: 1Gi
-      deleteClaim: true
-      class: standard
+      type: ephemeral
     metricsConfig:
       type: jmxPrometheusExporter
       valueFrom:
