@@ -1,0 +1,16 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: fashion-trends
+  namespace: fashion-analytics
+  labels:
+    strimzi.io/cluster: fashion-kafka
+spec:
+  partitions: 6
+  replicas: 1  # Use 3 in production
+  config:
+    retention.ms: 7776000000  # 90 days (longer retention for trend analysis)
+    cleanup.policy: compact,delete
+    min.compaction.lag.ms: 86400000  # 1 day
+    segment.bytes: 1073741824  # 1 GB
+    min.cleanable.dirty.ratio: 0.5
