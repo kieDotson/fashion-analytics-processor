@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apicurio-registry-instance
+  name: apicurio-registry-direct
   namespace: argocd
 spec:
   project: default
@@ -10,16 +10,16 @@ spec:
     targetRevision: HEAD
     path: infrastructure/kubernetes/apicurio
     directory:
-      recurse: true
-      jsonnet: {}
-      include: "registry.yaml"  # Only include the registry.yaml file
-      exclude: "kustomization.yaml"  # Explicitly exclude the kustomization file
+      recurse: false
+      include: "registry.yaml"
+      exclude: "*kustomization*"
   destination:
     server: https://kubernetes.default.svc
     namespace: fashion-analytics
   syncPolicy:
+    syncOptions:
+    - RespectIgnoreDifferences=true
+    - ApplyOutOfSyncOnly=true
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
