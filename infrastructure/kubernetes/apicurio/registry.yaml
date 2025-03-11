@@ -5,15 +5,8 @@ metadata:
   namespace: fashion-analytics
 spec:
   configuration:
-    persistence: kafka
-    kafka:
-      bootstrapServers: fashion-kafka-bootstrap.fashion-analytics.svc:9092
+    persistence: "kafkasql"
+    kafkasql:
+      bootstrapServers: "fashion-kafka-bootstrap.fashion-analytics.svc:9092"
   deployment:
     replicas: 1
-    resources:
-      requests:
-        memory: "256Mi"
-        cpu: "200m"
-      limits:
-        memory: "512Mi"
-        cpu: "500m"
