@@ -29,13 +29,18 @@ jobs:
       - name: Set up Kubernetes tools
         run: |
           # Install kubectl
-          curl -LO "https://dl.k8s.io/release/${{ env.KUBECTL_VERSION }}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           
-          # Install kustomize
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s ${{ env.KUSTOMIZE_VERSION }}
+          # Install kustomize directly from GitHub releases
+          curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz -o kustomize.tar.gz
+          tar -zxvf kustomize.tar.gz
+          chmod +x kustomize
           sudo mv kustomize /usr/local/bin/
+          
+          # Verify installation
+          kustomize version
           
           # Install Helm
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
