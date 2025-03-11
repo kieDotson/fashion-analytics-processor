@@ -1,0 +1,22 @@
+# Default values for strimzi-kafka-operator
+watchNamespaces:
+  - fashion-analytics
+
+# Resource requests/limits
+resources:
+  limits:
+    memory: 384Mi
+    cpu: 1000m
+  requests:
+    memory: 256Mi
+    cpu: 200m
+
+# Image configuration
+image:
+  registry: quay.io
+  repository: strimzi
+  name: operator
+  tag: 0.45.0
+
+# Logging configuration
+logLevel: INFO

@@ -1,0 +1,10 @@
+apiVersion: registry.apicur.io/v1
+kind: ApicurioRegistry
+metadata:
+  name: fashion-registry
+  namespace: fashion-analytics
+spec:
+  configuration:
+    persistence: kafka
+    kafka:
+      bootstrapServers: fashion-kafka-bootstrap.fashion-analytics.svc:9092

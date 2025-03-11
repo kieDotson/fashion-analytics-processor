@@ -1,0 +1,165 @@
+# Values for kube-prometheus-stack Helm chart
+# Configure Prometheus, Grafana, and AlertManager for fashion-analytics platform
+
+# Global settings
+nameOverride: ""
+fullnameOverride: "monitoring"
+namespaceOverride: "monitoring"
+
+# Common labels for all resources
+commonLabels:
+  app.kubernetes.io/part-of: "fashion-analytics"
+  app.kubernetes.io/managed-by: "argocd"
+
+# Prometheus configuration
+prometheus:
+  enabled: true
+  prometheusSpec:
+    # Size configuration
+    replicas: 1
+    retention: 10d
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+    
+    # Storage configuration - using ephemeral storage for development
+    storageSpec:
+      emptyDir:
+        medium: Memory
+        sizeLimit: 1Gi
+    
+    # ServiceMonitor configuration
+    serviceMonitorSelector:
+      matchLabels:
+        prometheus: kube-prometheus
+    
+    # Add rules to monitor Kafka and Apicurio
+    additionalScrapeConfigs:
+      - job_name: 'kafka'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - fashion-analytics
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_strimzi_io_name]
+            regex: .*-kafka
+            action: keep
+
+# Grafana configuration
+grafana:
+  enabled: true
+  adminPassword: "prom-operator"
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 200m
+  
+  # Dashboards
+  dashboards:
+    default:
+      kafka-overview:
+        # Kafka Dashboard
+        gnetId: 721
+        revision: 1
+        datasource: Prometheus
+      kafka-exporter:
+        # Kafka Exporter Dashboard
+        gnetId: 7589
+        revision: 5
+        datasource: Prometheus
+  
+  # Increase timeout for dashboard downloads
+  downloadDashboardsImage:
+    curlOptions: "-L --connect-timeout 60"
+  
+  # Grafana plugins
+  plugins:
+    - grafana-piechart-panel
+    - grafana-clock-panel
+
+# AlertManager configuration
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    replicas: 1
+    resources:
+      requests:
+        memory: 64Mi
+        cpu: 50m
+      limits:
+        memory: 128Mi
+        cpu: 100m
+
+# Prometheus Node Exporter
+nodeExporter:
+  enabled: true
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 50m
+    limits:
+      memory: 64Mi
+      cpu: 100m
+
+# kube-state-metrics
+kubeStateMetrics:
+  enabled: true
+
+# Prometheus Operator - the manager component that handles CRDs
+prometheusOperator:
+  enabled: true
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 200m
+  
+  # Only deploy CRDs if they don't exist yet
+  manageCrds: true
+
+# Additional PrometheusRules
+additionalPrometheusRules:
+  - name: fashion-analytics-rules
+    groups:
+      - name: kafka.rules
+        rules:
+          - alert: KafkaBrokerOffline
+            expr: sum(kafka_server_replicamanager_leaders) by (strimzi_io_name) < 3
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kafka broker offline"
+              description: "Kafka broker is offline for more than 5 minutes"
+          
+          - alert: KafkaTopicUnderReplicated
+            expr: sum(kafka_server_replicamanager_underreplicatedpartitions) > 0
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kafka topic under-replicated"
+              description: "Kafka topic has under-replicated partitions for more than 10 minutes"
+      
+      - name: apicurio.rules
+        rules:
+          - alert: ApicurioRegistryDown
+            expr: absent(up{job="apicurio-registry"})
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Apicurio Registry down"
+              description: "Apicurio Registry has been down for more than 5 minutes"
