@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/yourusername/fashion-analytics-processor.git
+    repoURL: https://github.com/kieDotson/fashion-analytics-processor.git
     targetRevision: HEAD
     path: infrastructure/kubernetes/apicurio
   destination:
