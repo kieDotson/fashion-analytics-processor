@@ -6,9 +6,20 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kieDotson/fashion-analytics-processor.git
-    targetRevision: HEAD
-    path: infrastructure/kubernetes/strimzi
+    repoURL: https://strimzi.io/charts/
+    targetRevision: 0.45.0
+    chart: strimzi-kafka-operator
+    helm:
+      values: |
+        watchNamespaces:
+          - fashion-analytics
+        resources:
+          limits:
+            memory: 384Mi
+            cpu: 1000m
+          requests:
+            memory: 256Mi
+            cpu: 200m
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka-operator
@@ -16,3 +27,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
