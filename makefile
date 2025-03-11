@@ -90,8 +90,7 @@ setup-monitoring: ## Set up Prometheus and Grafana for monitoring
 	helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
 		--namespace $(MONITORING_NAMESPACE) \
 		--values infrastructure/kubernetes/monitoring/prometheus-values.yaml
-	kubectl -n $(MONITORING_NAMESPACE) wait --for=condition=ready pod -l app=grafana --timeout=300s || true
-	@echo "Monitoring stack deployed successfully"
+	kubectl -n $(MONITORING_NAMESPACE) wait --for=condition=ready pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=monitoring" --timeout=300s || true	@echo "Monitoring stack deployed successfully"
 	@echo "Access Grafana:"
 	@echo "kubectl port-forward -n $(MONITORING_NAMESPACE) svc/monitoring-grafana 3000:80"
 	@echo "Then visit http://localhost:3000 (default credentials: admin/prom-operator)"
