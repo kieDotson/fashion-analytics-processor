@@ -7,6 +7,6 @@ spec:
   configuration:
     persistence: "kafkasql"
     kafkasql:
-      bootstrapServers: "fashion-kafka-bootstrap.fashion-analytics.svc:9092"
+      bootstrapServers: "fashion-kafka-kafka-bootstrap.fashion-analytics.svc:9092"
   deployment:
     replicas: 1

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apicurio-registry-direct
+  name: apicurio-registry-instance
   namespace: argocd
 spec:
   project: default
