@@ -40,6 +40,13 @@ create-namespaces: ## Create necessary Kubernetes namespaces
 	kubectl create namespace $(MONITORING_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	@echo "Namespaces created successfully"
 
+setup-crds: ## Install all required CRDs (Kustomize, Apicurio)
+	@echo "Setting up required CRDs..."
+	kubectl apply -f infrastructure/kubernetes/init/crds-installer.yaml
+	@echo "Waiting for CRDs installer job to complete..."
+	kubectl wait --for=condition=complete job/crds-installer -n fashion-analytics --timeout=300s || true
+	@echo "CRDs setup initiated"
+
 install-strimzi: ## Install Strimzi Kafka Operator
 	helm repo add strimzi https://strimzi.io/charts/ --force-update
 	helm upgrade --install strimzi-kafka-operator strimzi/strimzi-kafka-operator \
@@ -107,7 +114,7 @@ deploy-with-argocd: setup-argocd ## Deploy using ArgoCD for local GitOps testing
 	@echo "ArgoCD applications created. Check status with:"
 	@echo "kubectl get applications -n argocd"
 
-deploy-all: create-namespaces install-strimzi deploy-kafka deploy-registry-local setup-monitoring ## Deploy all components directly
+deploy-all: create-namespaces setup-crds install-strimzi deploy-kafka deploy-registry-local setup-monitoring ## Deploy all components directly
 	@echo "All infrastructure components deployed successfully"
 
 deploy-all-argocd: create-namespaces install-strimzi deploy-kafka setup-argocd deploy-with-argocd setup-monitoring ## Deploy with ArgoCD
