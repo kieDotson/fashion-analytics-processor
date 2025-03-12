@@ -15,6 +15,8 @@ commonLabels:
 prometheus:
   enabled: true
   prometheusSpec:
+    scrapeInterval: 30s
+    scrapeTimeout: 15s
     # Size configuration
     replicas: 1
     retention: 10d
@@ -64,19 +66,34 @@ grafana:
       memory: 256Mi
       cpu: 200m
   
-  # Dashboards
   dashboards:
     default:
-      kafka-overview:
-        # Kafka Dashboard
-        gnetId: 721
-        revision: 1
-        datasource: Prometheus
-      kafka-exporter:
-        # Kafka Exporter Dashboard
-        gnetId: 7589
-        revision: 5
-        datasource: Prometheus
+      # This will scan configmaps with this label and import them
+      kafka-dashboard:
+        json: |
+          {
+            "annotations": {
+              "list": [
+                {
+                  "builtIn": 1,
+                  "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+                  # (The rest of the dashboard JSON)
+                }
+              ]
+            }
+          }
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
   
   # Increase timeout for dashboard downloads
   downloadDashboardsImage:

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fashion-kafka-metrics
+  namespace: fashion-analytics
+  labels:
+    app: strimzi
+    strimzi.io/cluster: fashion-kafka
+    strimzi.io/kind: Kafka
+spec:
+  ports:
+  - name: metrics
+    port: 9404
+    protocol: TCP
+    targetPort: 9404
+  selector:
+    strimzi.io/cluster: fashion-kafka
+    strimzi.io/kind: Kafka
+  type: ClusterIP

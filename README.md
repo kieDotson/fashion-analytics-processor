@@ -235,6 +235,46 @@ ArgoCD provides several benefits:
 - **Rollback capability**: Revert to previous state if needed
 - **Visualization**: Clear view of all resources and their status
 
+#### Accessing Grafana Dashboards
+
+The monitoring stack includes Grafana for visualizing metrics from your Fashion Analytics Platform. Here's how to access and use it:
+
+1. **Port-forward the Grafana service**:
+   ```bash
+   kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80
+   ```
+
+2. **Access the Grafana UI**:
+   - Open your browser and navigate to http://localhost:3000
+   - Log in with the default credentials:
+     - Username: `admin`
+     - Password: `prom-operator` (or retrieve with the following command)
+       ```bash
+       kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 -d
+       ```
+
+3. **Available Dashboards**:
+   - **Kafka Overview**: Overall health and performance of your Kafka cluster
+   - **Kafka Exporter**: Detailed metrics for Kafka topics and consumer groups
+   - **Node Exporter**: System-level metrics for your Kubernetes nodes
+   - **Kubernetes Cluster**: Overall health of your Kubernetes cluster
+
+4. **Creating Custom Dashboards**:
+   - Click the "+" icon in the left sidebar and select "Dashboard"
+   - Choose "Add new panel" to create visualizations for specific metrics
+   - Query using PromQL to display data from Prometheus
+   - Example query for Kafka topic messages:
+     ```
+     sum(kafka_topic_partitions{topic="fashion-orders"}) by (topic)
+     ```
+
+5. **Setting Up Alerts** (for production):
+   - Navigate to Alerting in the left sidebar
+   - Configure alert rules based on metrics thresholds
+   - Set up notification channels (email, Slack, etc.)
+
+The Grafana dashboards provide critical visibility into your platform's performance and health, allowing you to monitor Kafka, the underlying Kubernetes infrastructure, and your custom applications. Some dashboard panels may not display data in development environments due to the selective metrics configuration. For production deployments, a more comprehensive metrics configuration can be applied.
+
 ### Getting Started
 
 #### Prerequisites

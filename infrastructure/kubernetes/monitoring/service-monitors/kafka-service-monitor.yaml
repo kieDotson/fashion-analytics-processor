@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: fashion-kafka-metrics
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  endpoints:
+  - port: metrics
+    interval: 30s
+  namespaceSelector:
+    matchNames:
+    - fashion-analytics
+  selector:
+    matchLabels:
+      app: strimzi
+      strimzi.io/kind: Kafka
+      strimzi.io/cluster: fashion-kafka

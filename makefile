@@ -95,6 +95,11 @@ setup-monitoring: ## Set up Prometheus and Grafana for monitoring
 	@echo "kubectl port-forward -n $(MONITORING_NAMESPACE) svc/monitoring-grafana 3000:80"
 	@echo "Then visit http://localhost:3000 (default credentials: admin/prom-operator)"
 
+deploy-kafka-metrics: ## Deploy Kafka metrics service and monitor
+	kubectl apply -f infrastructure/kubernetes/kafka/metrics/kafka-metrics-service.yaml
+	kubectl apply -f infrastructure/kubernetes/monitoring/service-monitors/kafka-service-monitor.yaml
+	@echo "Kafka metrics configuration deployed"
+
 setup-argocd: ## Install and configure ArgoCD
 	kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -113,7 +118,7 @@ deploy-with-argocd: setup-argocd ## Deploy using ArgoCD for local GitOps testing
 	@echo "ArgoCD applications created. Check status with:"
 	@echo "kubectl get applications -n argocd"
 
-deploy-all: create-namespaces setup-crds install-strimzi deploy-kafka deploy-registry-local setup-monitoring ## Deploy all components directly
+deploy-all: create-namespaces setup-crds install-strimzi deploy-kafka deploy-registry-local setup-monitoring deploy-kafka-metrics ## Deploy all components directly
 	@echo "All infrastructure components deployed successfully"
 
 deploy-all-argocd: create-namespaces install-strimzi deploy-kafka setup-argocd deploy-with-argocd setup-monitoring ## Deploy with ArgoCD
