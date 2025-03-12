@@ -50,82 +50,82 @@ jobs:
           # Install yamllint
           sudo apt-get update && sudo apt-get install -y yamllint
       
-- name: Validate YAML formatting
-  run: |
-    # Create .yamllint.yaml file if it doesn't exist
-    if [ ! -f ../.yamllint.yaml ]; then
-      echo "Creating default .yamllint.yaml file"
-      cat > ../.yamllint.yaml << EOF
-    extends: default
-    
-    rules:
-      line-length:
-        max: 120
-        level: warning
-      document-start:
-        present: true
-        level: warning
-    EOF
-    fi
-    
-    # Fail on linting issues
-    yamllint -c .yamllint.yaml infrastructure/
-
-  - name: Validate Kustomize resources
-    run: |
-      # Initialize error flag
-      KUSTOMIZE_ERROR=0
-      
-      # Validate each component using kustomize
-      for dir in $(find infrastructure/kubernetes -name "kustomization.yaml" -exec dirname {} \;); do
-        echo "Validating kustomize directory: $dir"
-        if ! kustomize build $dir > /dev/null; then
-          echo "Error: Kustomize validation failed in $dir"
-          KUSTOMIZE_ERROR=1
-        fi
-      done
-      
-      # Exit with error if any kustomize build failed
-      exit $KUSTOMIZE_ERROR
-
-  - name: Validate Helm templates
-    run: |
-      # Initialize error flag
-      HELM_ERROR=0
-      
-      # Validate Helm values for monitoring
-      if ! helm template monitoring prometheus-community/kube-prometheus-stack \
-          -f infrastructure/kubernetes/monitoring/prometheus-values.yaml \
-          --namespace monitoring > /dev/null; then
-        echo "Error: Helm template validation failed for monitoring"
-        HELM_ERROR=1
-      fi
+      - name: Validate YAML formatting
+        run: |
+          # Create .yamllint.yaml file if it doesn't exist
+          if [ ! -f ../.yamllint.yaml ]; then
+            echo "Creating default .yamllint.yaml file"
+            cat > ../.yamllint.yaml << EOF
+          extends: default
           
-      # Validate Helm values for Strimzi
-      if ! helm template strimzi-kafka-operator strimzi/strimzi-kafka-operator \
-          -f infrastructure/kubernetes/strimzi/values.yaml \
-          --namespace kafka-operator > /dev/null; then
-        echo "Error: Helm template validation failed for Strimzi"
-        HELM_ERROR=1
-      fi
-      
-      # Exit with error if any helm template failed
-      exit $HELM_ERROR
+          rules:
+            line-length:
+              max: 120
+              level: warning
+            document-start:
+              present: true
+              level: warning
+          EOF
+          fi
+          
+          # Fail on linting issues
+          yamllint -c .yamllint.yaml infrastructure/
 
-  - name: Check for syntax errors
-    run: |
-      # Initialize error flag
-      SYNTAX_ERROR=0
-      
-      for file in $(find infrastructure -name "*.yaml" -type f -not -path "*/kustomization.yaml" -not -path "*/values.yaml"); do
-        if ! kubectl apply --dry-run=client -f $file; then
-          echo "Error: Syntax error in $file"
-          SYNTAX_ERROR=1
-        fi
-      done
-      
-      # Exit with error if any syntax check failed
-      exit $SYNTAX_ERROR
+        - name: Validate Kustomize resources
+          run: |
+            # Initialize error flag
+            KUSTOMIZE_ERROR=0
+            
+            # Validate each component using kustomize
+            for dir in $(find infrastructure/kubernetes -name "kustomization.yaml" -exec dirname {} \;); do
+              echo "Validating kustomize directory: $dir"
+              if ! kustomize build $dir > /dev/null; then
+                echo "Error: Kustomize validation failed in $dir"
+                KUSTOMIZE_ERROR=1
+              fi
+            done
+            
+            # Exit with error if any kustomize build failed
+            exit $KUSTOMIZE_ERROR
+
+        - name: Validate Helm templates
+          run: |
+            # Initialize error flag
+            HELM_ERROR=0
+            
+            # Validate Helm values for monitoring
+            if ! helm template monitoring prometheus-community/kube-prometheus-stack \
+                -f infrastructure/kubernetes/monitoring/prometheus-values.yaml \
+                --namespace monitoring > /dev/null; then
+              echo "Error: Helm template validation failed for monitoring"
+              HELM_ERROR=1
+            fi
+                
+            # Validate Helm values for Strimzi
+            if ! helm template strimzi-kafka-operator strimzi/strimzi-kafka-operator \
+                -f infrastructure/kubernetes/strimzi/values.yaml \
+                --namespace kafka-operator > /dev/null; then
+              echo "Error: Helm template validation failed for Strimzi"
+              HELM_ERROR=1
+            fi
+            
+            # Exit with error if any helm template failed
+            exit $HELM_ERROR
+
+        - name: Check for syntax errors
+          run: |
+            # Initialize error flag
+            SYNTAX_ERROR=0
+            
+            for file in $(find infrastructure -name "*.yaml" -type f -not -path "*/kustomization.yaml" -not -path "*/values.yaml"); do
+              if ! kubectl apply --dry-run=client -f $file; then
+                echo "Error: Syntax error in $file"
+                SYNTAX_ERROR=1
+              fi
+            done
+            
+            # Exit with error if any syntax check failed
+            exit $SYNTAX_ERROR
 
   deploy:
     name: Deploy to Environment
