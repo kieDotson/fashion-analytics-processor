@@ -3,13 +3,13 @@ name: Infrastructure CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'infrastructure/**'
+      - "infrastructure/**"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'infrastructure/**'
+      - "infrastructure/**"
   workflow_dispatch:
     # Allow manual triggers
 
@@ -32,24 +32,24 @@ jobs:
           curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-          
+
           # Install kustomize directly from GitHub releases
           curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.6.0/kustomize_v5.6.0_linux_amd64.tar.gz -o kustomize.tar.gz
           tar -zxvf kustomize.tar.gz
           chmod +x kustomize
           sudo mv kustomize /usr/local/bin/
-          
+
           # Verify installation
           kustomize version
-          
+
           # Install Helm
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
           chmod 700 get_helm.sh
           ./get_helm.sh --version ${{ env.HELM_VERSION }}
-          
+
           # Install yamllint
           sudo apt-get update && sudo apt-get install -y yamllint
-      
+
       - name: Validate YAML formatting
         run: |
           # Create .yamllint.yaml file if it doesn't exist
@@ -57,7 +57,7 @@ jobs:
             echo "Creating default .yamllint.yaml file"
             cat > ../.yamllint.yaml << EOF
           extends: default
-          
+
           rules:
             line-length:
               max: 120
@@ -67,88 +67,88 @@ jobs:
               level: warning
           EOF
           fi
-          
+
           # Fail on linting issues
           yamllint -c .yamllint.yaml infrastructure/
 
-        - name: Validate Kustomize resources
-          run: |
-            # Initialize error flag
-            KUSTOMIZE_ERROR=0
-            
-            # Validate each component using kustomize
-            for dir in $(find infrastructure/kubernetes -name "kustomization.yaml" -exec dirname {} \;); do
-              echo "Validating kustomize directory: $dir"
-              if ! kustomize build $dir > /dev/null; then
-                echo "Error: Kustomize validation failed in $dir"
-                KUSTOMIZE_ERROR=1
-              fi
-            done
-            
-            # Exit with error if any kustomize build failed
-            exit $KUSTOMIZE_ERROR
+      - name: Validate Kustomize resources
+        run: |
+          # Initialize error flag
+          KUSTOMIZE_ERROR=0
 
-        - name: Validate Helm templates
-          run: |
-            # Initialize error flag
-            HELM_ERROR=0
-            
-            # Validate Helm values for monitoring
-            if ! helm template monitoring prometheus-community/kube-prometheus-stack \
-                -f infrastructure/kubernetes/monitoring/prometheus-values.yaml \
-                --namespace monitoring > /dev/null; then
-              echo "Error: Helm template validation failed for monitoring"
-              HELM_ERROR=1
+          # Validate each component using kustomize
+          for dir in $(find infrastructure/kubernetes -name "kustomization.yaml" -exec dirname {} \;); do
+            echo "Validating kustomize directory: $dir"
+            if ! kustomize build $dir > /dev/null; then
+              echo "Error: Kustomize validation failed in $dir"
+              KUSTOMIZE_ERROR=1
             fi
-                
-            # Validate Helm values for Strimzi
-            if ! helm template strimzi-kafka-operator strimzi/strimzi-kafka-operator \
-                -f infrastructure/kubernetes/strimzi/values.yaml \
-                --namespace kafka-operator > /dev/null; then
-              echo "Error: Helm template validation failed for Strimzi"
-              HELM_ERROR=1
-            fi
-            
-            # Exit with error if any helm template failed
-            exit $HELM_ERROR
+          done
 
-        - name: Check for syntax errors
-          run: |
-            # Initialize error flag
-            SYNTAX_ERROR=0
-            
-            for file in $(find infrastructure -name "*.yaml" -type f -not -path "*/kustomization.yaml" -not -path "*/values.yaml"); do
-              if ! kubectl apply --dry-run=client -f $file; then
-                echo "Error: Syntax error in $file"
-                SYNTAX_ERROR=1
-              fi
-            done
-            
-            # Exit with error if any syntax check failed
-            exit $SYNTAX_ERROR
+          # Exit with error if any kustomize build failed
+          exit $KUSTOMIZE_ERROR
+
+      - name: Validate Helm templates
+        run: |
+          # Initialize error flag
+          HELM_ERROR=0
+
+          # Validate Helm values for monitoring
+          if ! helm template monitoring prometheus-community/kube-prometheus-stack \
+              -f infrastructure/kubernetes/monitoring/prometheus-values.yaml \
+              --namespace monitoring > /dev/null; then
+            echo "Error: Helm template validation failed for monitoring"
+            HELM_ERROR=1
+          fi
+              
+          # Validate Helm values for Strimzi
+          if ! helm template strimzi-kafka-operator strimzi/strimzi-kafka-operator \
+              -f infrastructure/kubernetes/strimzi/values.yaml \
+              --namespace kafka-operator > /dev/null; then
+            echo "Error: Helm template validation failed for Strimzi"
+            HELM_ERROR=1
+          fi
+
+          # Exit with error if any helm template failed
+          exit $HELM_ERROR
+
+      - name: Check for syntax errors
+        run: |
+          # Initialize error flag
+          SYNTAX_ERROR=0
+
+          for file in $(find infrastructure -name "*.yaml" -type f -not -path "*/kustomization.yaml" -not -path "*/values.yaml"); do
+            if ! kubectl apply --dry-run=client -f $file; then
+              echo "Error: Syntax error in $file"
+              SYNTAX_ERROR=1
+            fi
+          done
+
+          # Exit with error if any syntax check failed
+          exit $SYNTAX_ERROR
 
   deploy:
     name: Deploy to Environment
     needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Set up ArgoCD CLI
         run: |
           curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           chmod +x argocd
           sudo mv argocd /usr/local/bin/
-      
+
       - name: Configure kubectl
         uses: azure/k8s-set-context@v1
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG }}
-      
+
       - name: Deploy with ArgoCD
         run: |
           # Login to ArgoCD
@@ -156,44 +156,44 @@ jobs:
             --username ${{ secrets.ARGOCD_USERNAME }} \
             --password ${{ secrets.ARGOCD_PASSWORD }} \
             --insecure
-          
+
           # Apply all ArgoCD applications
           kubectl apply -f infrastructure/kubernetes/argocd/applications/
-          
+
           # Sync all applications in the correct order
           echo "Syncing infrastructure components..."
-          
+
           # 1. Storage classes (foundational)
           argocd app sync storage-classes
           argocd app wait storage-classes --health --timeout 300
-          
+
           # 2. Operators
           echo "Syncing operators..."
           argocd app sync kafka-operator
           argocd app wait kafka-operator --health --timeout 300
-          
+
           argocd app sync apicurio-registry-operator
           argocd app wait apicurio-registry-operator --health --timeout 300
-          
+
           # 3. Services and instances
           echo "Syncing services..."
           argocd app sync kafka-cluster
           argocd app wait kafka-cluster --health --timeout 600
-          
+
           argocd app sync apicurio-registry-instance
           argocd app wait apicurio-registry-instance --health --timeout 300
-          
+
           # 4. Monitoring (last, as it depends on services to monitor)
           echo "Syncing monitoring..."
           argocd app sync monitoring-stack
           argocd app wait monitoring-stack --health --timeout 300
-      
+
       - name: Verify deployment
         run: |
           echo "Verifying Kafka deployment..."
           kubectl get kafka -n fashion-analytics
-          
+
           echo "Verifying Apicurio Registry deployment..."
           kubectl get apicurioregistry -n fashion-analytics
-          
+
           echo "Deployment complete!"
