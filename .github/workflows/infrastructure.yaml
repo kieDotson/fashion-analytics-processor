@@ -94,10 +94,10 @@ jobs:
       - name: Validate Helm configurations
         run: |
           # Validate Strimzi values
-          helm template --dry-run strimzi-kafka strimzi/kafka-operator -f ./path/to/strimzi-values.yaml
+          helm template --dry-run strimzi-kafka strimzi/kafka-operator -f $GITHUB_WORKSPACE/infrastructure/kubernetes/strimzi/values.yaml
           
           # Validate Prometheus values
-          helm template --dry-run prometheus prometheus-community/kube-prometheus-stack -f ./path/to/prometheus-values.yaml
+          helm template --dry-run prometheus prometheus-community/kube-prometheus-stack -f $GITHUB_WORKSPACE/infrastructure/kubernetes/monitoring/prometheus-values.yaml
       
       - name: Lint generated Kubernetes manifests
         run: |
