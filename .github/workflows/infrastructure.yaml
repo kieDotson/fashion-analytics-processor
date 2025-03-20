@@ -107,7 +107,8 @@ jobs:
           helm template prometheus prometheus-community/kube-prometheus-stack -f $GITHUB_WORKSPACE/infrastructure/kubernetes/monitoring/prometheus-values.yaml > rendered-templates/prometheus.yaml
           
           # Validate rendered templates
-          kubectl validate -f rendered-templates/ --dry-run=client
+          kubectl apply --dry-run=client -f rendered-templates/strimzi.yaml
+          kubectl apply --dry-run=client -f rendered-templates/prometheus.yaml
 
       - name: Check for syntax errors
         run: |
