@@ -5,4 +5,4 @@ metadata:
   namespace: fashion-analytics
 spec:
   targetNamespaces:
-  - fashion-analytics
+    - fashion-analytics

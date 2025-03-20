@@ -18,8 +18,8 @@ spec:
     namespace: fashion-analytics
   syncPolicy:
     syncOptions:
-    - RespectIgnoreDifferences=true
-    - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+      - ApplyOutOfSyncOnly=true
     automated:
       prune: true
       selfHeal: true

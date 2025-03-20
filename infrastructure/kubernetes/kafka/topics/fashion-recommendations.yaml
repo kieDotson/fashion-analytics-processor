@@ -7,10 +7,10 @@ metadata:
     strimzi.io/cluster: fashion-kafka
 spec:
   partitions: 12
-  replicas: 1  # Use 3 in production
+  replicas: 1 # Use 3 in production
   config:
-    retention.ms: 604800000  # 7 days (recommendations are more time-sensitive)
+    retention.ms: 604800000 # 7 days (recommendations are more time-sensitive)
     cleanup.policy: delete
-    segment.bytes: 1073741824  # 1 GB
+    segment.bytes: 1073741824 # 1 GB
     message.timestamp.type: CreateTime
-    max.message.bytes: 1048576  # 1 MB (larger messages for rich recommendation data)
+    max.message.bytes: 1048576 # 1 MB (larger messages for rich recommendation data)F

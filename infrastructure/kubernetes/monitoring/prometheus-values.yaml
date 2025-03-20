@@ -27,21 +27,21 @@ prometheus:
       limits:
         memory: 512Mi
         cpu: 500m
-    
+
     # Storage configuration - using ephemeral storage for development
     storageSpec:
       emptyDir:
         medium: Memory
         sizeLimit: 1Gi
-    
+
     # ServiceMonitor configuration
     serviceMonitorSelector:
       matchLabels:
         prometheus: kube-prometheus
-    
+
     # Add rules to monitor Kafka and Apicurio
     additionalScrapeConfigs:
-      - job_name: 'kafka'
+      - job_name: "kafka"
         kubernetes_sd_configs:
           - role: pod
             namespaces:
@@ -65,7 +65,7 @@ grafana:
     limits:
       memory: 256Mi
       cpu: 200m
-  
+
   dashboards:
     default:
       # This will scan configmaps with this label and import them
@@ -86,19 +86,19 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
-  
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
   # Increase timeout for dashboard downloads
   downloadDashboardsImage:
     curlOptions: "-L --connect-timeout 60"
-  
+
   # Grafana plugins
   plugins:
     - grafana-piechart-panel
@@ -142,7 +142,7 @@ prometheusOperator:
     limits:
       memory: 256Mi
       cpu: 200m
-  
+
   # Only deploy CRDs if they don't exist yet
   manageCrds: true
 
@@ -160,7 +160,7 @@ additionalPrometheusRules:
             annotations:
               summary: "Kafka broker offline"
               description: "Kafka broker is offline for more than 5 minutes"
-          
+
           - alert: KafkaTopicUnderReplicated
             expr: sum(kafka_server_replicamanager_underreplicatedpartitions) > 0
             for: 10m
@@ -169,7 +169,7 @@ additionalPrometheusRules:
             annotations:
               summary: "Kafka topic under-replicated"
               description: "Kafka topic has under-replicated partitions for more than 10 minutes"
-      
+
       - name: apicurio.rules
         rules:
           - alert: ApicurioRegistryDown

@@ -10,21 +10,21 @@ kind: ClusterRole
 metadata:
   name: crds-installer-role
 rules:
-- apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions"]
-  verbs: ["get", "list", "create", "update", "patch"]
-- apiGroups: ["operators.coreos.com"]
-  resources: ["operatorgroups", "subscriptions", "clusterserviceversions"]
-  verbs: ["get", "list", "create", "update", "patch"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "create", "update", "patch"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["operatorgroups", "subscriptions", "clusterserviceversions"]
+    verbs: ["get", "list", "create", "update", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: crds-installer-rolebinding
 subjects:
-- kind: ServiceAccount
-  name: crds-installer-sa
-  namespace: fashion-analytics
+  - kind: ServiceAccount
+    name: crds-installer-sa
+    namespace: fashion-analytics
 roleRef:
   kind: ClusterRole
   name: crds-installer-role
@@ -40,53 +40,53 @@ spec:
     spec:
       serviceAccountName: crds-installer-sa
       containers:
-      - name: kubectl
-        image: bitnami/kubectl:latest
-        command:
-        - /bin/sh
-        - -c
-        - |
-          echo "Installing Kustomize CRD..."
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/kustomize/v1beta1/kustomizationv1beta1.yaml
-          
-          echo "Installing OLM for Apicurio Registry CRD..."
-          curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.24.0/install.sh | bash -s v0.24.0
-          
-          echo "Installing Apicurio Registry Operator and CRD..."
-          cat <<EOF | kubectl apply -f -
-          apiVersion: operators.coreos.com/v1
-          kind: OperatorGroup
-          metadata:
-            name: apicurio-registry-operator
-            namespace: fashion-analytics
-          spec:
-            targetNamespaces:
-            - fashion-analytics
-          EOF
-          
-          cat <<EOF | kubectl apply -f -
-          apiVersion: operators.coreos.com/v1alpha1
-          kind: Subscription
-          metadata:
-            name: apicurio-registry
-            namespace: fashion-analytics
-          spec:
-            channel: 2.x
-            name: apicurio-registry
-            source: operatorhubio-catalog
-            sourceNamespace: olm
-          EOF
-          
-          echo "Waiting for Apicurio Registry CRD to be available..."
-          for i in {1..30}; do
-            if kubectl get crd | grep -q apicurioregistries.registry.apicur.io; then
-              echo "Apicurio Registry CRD is available"
-              break
-            fi
-            echo "Waiting for Apicurio Registry CRD to be available... attempt $i"
-            sleep 10
-          done
-          
-          echo "CRD installation completed"
+        - name: kubectl
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Installing Kustomize CRD..."
+              kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/api/kustomize/v1beta1/kustomizationv1beta1.yaml
+
+              echo "Installing OLM for Apicurio Registry CRD..."
+              curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.24.0/install.sh | bash -s v0.24.0
+
+              echo "Installing Apicurio Registry Operator and CRD..."
+              cat <<EOF | kubectl apply -f -
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: apicurio-registry-operator
+                namespace: fashion-analytics
+              spec:
+                targetNamespaces:
+                - fashion-analytics
+              EOF
+
+              cat <<EOF | kubectl apply -f -
+              apiVersion: operators.coreos.com/v1alpha1
+              kind: Subscription
+              metadata:
+                name: apicurio-registry
+                namespace: fashion-analytics
+              spec:
+                channel: 2.x
+                name: apicurio-registry
+                source: operatorhubio-catalog
+                sourceNamespace: olm
+              EOF
+
+              echo "Waiting for Apicurio Registry CRD to be available..."
+              for i in {1..30}; do
+                if kubectl get crd | grep -q apicurioregistries.registry.apicur.io; then
+                  echo "Apicurio Registry CRD is available"
+                  break
+                fi
+                echo "Waiting for Apicurio Registry CRD to be available... attempt $i"
+                sleep 10
+              done
+
+              echo "CRD installation completed"
       restartPolicy: OnFailure
   backoffLimit: 2

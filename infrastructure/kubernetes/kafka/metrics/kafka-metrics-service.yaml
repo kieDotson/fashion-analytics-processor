@@ -9,10 +9,10 @@ metadata:
     strimzi.io/kind: Kafka
 spec:
   ports:
-  - name: metrics
-    port: 9404
-    protocol: TCP
-    targetPort: 9404
+    - name: metrics
+      port: 9404
+      protocol: TCP
+      targetPort: 9404
   selector:
     strimzi.io/cluster: fashion-kafka
     strimzi.io/kind: Kafka

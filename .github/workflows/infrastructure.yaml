@@ -11,7 +11,7 @@ on:
     paths:
       - "infrastructure/**"
   workflow_dispatch:
-     # Allow manual triggers
+    # Allow manual triggers
 
 env:
   KUBECTL_VERSION: "v1.28.0"
@@ -55,16 +55,16 @@ jobs:
           # Create .yamllint.yaml file
           cat > $GITHUB_WORKSPACE/.yamllint.yaml << EOF
           extends: default
-          
+
           rules:
             line-length:
               max: 120
               level: warning
             document-start:
-              present: true
+              present: false
               level: warning
           EOF
-          
+
           # Run yamllint with the newly created config
           yamllint -c $GITHUB_WORKSPACE/.yamllint.yaml infrastructure/
 
