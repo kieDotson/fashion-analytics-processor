@@ -52,12 +52,10 @@ jobs:
 
       - name: Validate YAML formatting
         run: |
-          # Create .yamllint.yaml file if it doesn't exist
-          if [ ! -f ../.yamllint.yaml ]; then
-            echo "Creating default .yamllint.yaml file"
-            cat > ../.yamllint.yaml << EOF
+          # Create .yamllint.yaml file
+          cat > $GITHUB_WORKSPACE/.yamllint.yaml << EOF
           extends: default
-
+          
           rules:
             line-length:
               max: 120
@@ -66,9 +64,8 @@ jobs:
               present: true
               level: warning
           EOF
-          fi
-
-          # Fail on linting issues
+          
+          # Run yamllint with the newly created config
           yamllint -c $GITHUB_WORKSPACE/.yamllint.yaml infrastructure/
 
       - name: Validate Kustomize resources
