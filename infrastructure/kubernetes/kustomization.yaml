@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - storage
-  - strimzi
   - kafka
   - operators/apicurio
   - apicurio
