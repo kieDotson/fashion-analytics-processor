@@ -5,6 +5,4 @@ resources:
   - storage
   - kafka
   - operators/apicurio
-  - apicurio
-  - monitoring
   - argocd
