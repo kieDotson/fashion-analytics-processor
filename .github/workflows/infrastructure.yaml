@@ -103,7 +103,7 @@ jobs:
         run: |
           # Render templates
           mkdir -p rendered-templates
-          helm template strimzi-kafka strimzi/kafka-operator -f $GITHUB_WORKSPACE/infrastructure/kubernetes/strimzi/values.yaml > rendered-templates/strimzi.yaml
+          helm template strimzi-kafka strimzi/strimzi-kafka-operator -f $GITHUB_WORKSPACE/infrastructure/kubernetes/strimzi/values.yaml > rendered-templates/strimzi.yaml
           helm template prometheus prometheus-community/kube-prometheus-stack -f $GITHUB_WORKSPACE/infrastructure/kubernetes/monitoring/prometheus-values.yaml > rendered-templates/prometheus.yaml
           
           # Validate rendered templates
