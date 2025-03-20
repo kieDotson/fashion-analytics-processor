@@ -69,7 +69,7 @@ jobs:
           fi
 
           # Fail on linting issues
-          yamllint -c .yamllint.yaml infrastructure/
+          yamllint -c $GITHUB_WORKSPACE/.yamllint.yaml infrastructure/
 
       - name: Validate Kustomize resources
         run: |
