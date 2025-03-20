@@ -4,12 +4,14 @@ name: Infrastructure CI/CD
 on:
   push:
     branches: [main]
-    paths: 
+    paths:
       - "infrastructure/**"
   pull_request:
     branches: [main]
     paths:
       - "infrastructure/**"
+  workflow_dispatch:
+     # Allow manual triggers
 
 env:
   KUBECTL_VERSION: "v1.28.0"
