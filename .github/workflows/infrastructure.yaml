@@ -102,7 +102,11 @@ jobs:
       - name: Basic schema validation
         run: |
           # Install Kubeconform
-          ./kubeconform -ignore-missing-schemas -summary rendered-templates/*.yaml
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-darwin-amd64.tar.gz -o kubeconform.tar.gz
+          tar -zxvf kubeconform.tar.gz
+          chmod +x kubeconform
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -ignore-missing-schemas -summary rendered-templates/*.yaml
           
       - name: Create ephemeral Kind cluster for server-side validation
         uses: helm/kind-action@v1.5.0
