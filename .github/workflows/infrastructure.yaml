@@ -99,16 +99,24 @@ jobs:
           # Validate Prometheus values
           helm template --dry-run prometheus prometheus-community/kube-prometheus-stack -f $GITHUB_WORKSPACE/infrastructure/kubernetes/monitoring/prometheus-values.yaml
       
-      - name: Lint generated Kubernetes manifests
+      - name: Basic schema validation
         run: |
-          # Render templates
-          mkdir -p rendered-templates
-          helm template strimzi-kafka strimzi/strimzi-kafka-operator -f $GITHUB_WORKSPACE/infrastructure/kubernetes/strimzi/values.yaml > rendered-templates/strimzi.yaml
-          helm template prometheus prometheus-community/kube-prometheus-stack -f $GITHUB_WORKSPACE/infrastructure/kubernetes/monitoring/prometheus-values.yaml > rendered-templates/prometheus.yaml
+          # Install Kubeconform
+          ./kubeconform -ignore-missing-schemas -summary rendered-templates/*.yaml
           
-          # Validate rendered templates
-          kubectl apply --dry-run=client -f rendered-templates/strimzi.yaml
-          kubectl apply --dry-run=client -f rendered-templates/prometheus.yaml
+      - name: Create ephemeral Kind cluster for server-side validation
+        uses: helm/kind-action@v1.5.0
+        
+      - name: Install operator CRDs
+        run: |
+          kubectl apply -f https://strimzi.io/install/latest?namespace=default
+          # Apply other CRDs
+          
+      - name: Advanced server-side validation
+        run: |
+          # we need special validation for custom controllers as kubeconform only handles core kubernetes components
+          kubectl apply --dry-run=server -f rendered-templates/*.yaml
+
 
       - name: Check for syntax errors
         run: |
