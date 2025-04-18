@@ -13,4 +13,4 @@ spec:
     cleanup.policy: delete
     segment.bytes: 1073741824 # 1 GB
     message.timestamp.type: CreateTime
-    max.message.bytes: 1048576 # 1 MB (larger messages for rich recommendation data)F
+    max.message.bytes: 200000000 # 1 MB (larger messages for rich recommendation data)

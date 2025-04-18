@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+spec:
+  ports:
+    - port: 9092
+      targetPort: 9092
+      nodePort: 30093  # Expose it on a port outside the cluster
+  selector:
+    app: kafka  # Make sure this matches the selector for your Kafka pods
+  type: NodePort  # Expose it using NodePort

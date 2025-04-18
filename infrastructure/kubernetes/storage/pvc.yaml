@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard  # Add this line
+  volumeName: my-pv  # Explicitly reference the PV
+  resources:
+    requests:
+      storage: 10Gi

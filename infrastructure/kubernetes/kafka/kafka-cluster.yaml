@@ -20,7 +20,8 @@ spec:
         tls: false
         configuration:
           bootstrap:
-            nodePort: 30092
+            nodePort: 30093
+            host: 127.0.0.1
     config:
       offsets.topic.replication.factor: 1 # use 3 for prod
       transaction.state.log.replication.factor: 1 # use 3 for prod
@@ -33,6 +34,12 @@ spec:
       num.io.threads: 4
       num.network.threads: 3
       num.replica.fetchers: 1
+      message.max.bytes: 200000000  # Increase message size
+      replica.fetch.max.bytes: 200000000  # Allow larger fetches
+      listener.security.protocol.map: "EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      listeners: "PLAINTEXT://:9092,EXTERNAL://:9094"
+      advertised.listeners: "PLAINTEXT://my-cluster-kafka-bootstrap.default.svc.cluster.local:9092,EXTERNAL://127.0.0.1:30093"
+      inter.broker.listener.name: PLAINTEXT
     resources:
       requests:
         memory: 512Mi
@@ -44,8 +51,10 @@ spec:
       -Xms: "512m"
       -Xmx: "512m"
     storage:
-      # For production use persistent storage with moderate size(2gi), a deleteClaim, and standard class
-      type: ephemeral
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      class: standard
     metricsConfig:
       type: jmxPrometheusExporter
       valueFrom:
@@ -65,7 +74,10 @@ spec:
       -Xms: "256m"
       -Xmx: "256m"
     storage:
-      type: ephemeral
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      class: standard
     metricsConfig:
       type: jmxPrometheusExporter
       valueFrom:

@@ -5,5 +5,14 @@ nodes:
     extraPortMappings:
       - containerPort: 30080
         hostPort: 30080
+    extraMounts:
+      - hostPath: /Users/k_book/Code/fashion-analytics-processor/infrastructure/kubernetes/kind-storage
+        containerPath: /mnt/data
   - role: worker
+    extraMounts:
+      - hostPath: /Users/k_book/Code/fashion-analytics-processor/infrastructure/kubernetes/kind-storage
+        containerPath: /mnt/data
   - role: worker
+    extraMounts:
+      - hostPath: /Users/k_book/Code/fashion-analytics-processor/infrastructure/kubernetes/kind-storage
+        containerPath: /mnt/data

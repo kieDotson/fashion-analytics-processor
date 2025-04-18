@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-generator-service
+spec:
+  selector:
+    app: data-generator
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

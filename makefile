@@ -75,12 +75,13 @@ deploy-kafka: setup-storage-class ## Deploy Kafka cluster
 	fi
 
 deploy-registry-local: ## Deploy Apicurio Registry operator and instance using declarative approach
-	@echo "Installing the Apicurio Registry Operator..."
+	chmod +x infrastructure/scripts/install-apicurio.sh
+	./infrastructure/scripts/install-apicurio.sh
+	@echo "Apicurio Registry Operator installed"
 	kubectl apply -f infrastructure/kubernetes/operators/apicurio/operatorgroup.yaml
 	kubectl apply -f infrastructure/kubernetes/operators/apicurio/subscription.yaml
 	@echo "Waiting for CRDs to be available (60 seconds)..."
 	sleep 60
-	@kubectl get crd | grep -q apicurioregistries.registry.apicur.io && echo "CRD is available" || echo "CRD not yet available, manual check required"
 	@echo "Deploying the Apicurio Registry instance..."
 	kubectl apply -f infrastructure/kubernetes/apicurio/registry.yaml
 	@echo "Registry deployment initiated - this may take a few minutes to complete"
