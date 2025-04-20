@@ -8,3 +8,5 @@ resources:
   - applications/monitoring.yaml
   - applications/apicurio-operator.yaml
   - applications/apicurio-instance.yaml
+  - applications/data-consumer.yaml
+  - applications/data-generator.yaml

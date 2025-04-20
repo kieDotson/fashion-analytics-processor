@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fashion-analytics-flink-job-submitter
+  namespace: fashion-analytics
+spec:
+  template:
+    spec:
+      containers:
+      - name: job-submitter
+        image: apache/flink:1.18
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          # Wait for the JobManager to be available
+          echo "Waiting for JobManager to be ready..."
+          until curl -s http://flink-jobmanager:8081/jobs > /dev/null; do
+            sleep 5
+          done
+          
+          # Copy the JAR file to the container
+          echo "Submitting Flink job..."
+          /opt/flink/bin/flink run \
+            -d \
+            -p 2 \
+            /opt/flink/usrlib/fashion-analytics-processor-1.0-SNAPSHOT.jar
+          
+          echo "Job submitted successfully."
+        volumeMounts:
+        - name: jar-volume
+          mountPath: /opt/flink/usrlib/
+      volumes:
+      - name: jar-volume
+        configMap:
+          name: fashion-analytics-processor-jar
+      restartPolicy: OnFailure
+  backoffLimit: 3

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fashion-analytics-consumer
+  namespace: fashion-analytics
+  labels:
+    app: fashion-analytics-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fashion-analytics-consumer
+  template:
+    metadata:
+      labels:
+        app: fashion-analytics-consumer
+    spec:
+      containers:
+        - name: consumer
+          image: fashion-analytics-consumer:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "fashion-kafka-kafka-bootstrap.fashion-analytics.svc:9092"
+          # Add liveness and readiness probes
+          livenessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "import socket; socket.socket().connect((\"fashion-kafka-kafka-bootstrap.fashion-analytics.svc\", 9092))"
+            initialDelaySeconds: 30
+            periodSeconds: 30

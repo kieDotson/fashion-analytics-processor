@@ -6,3 +6,6 @@ resources:
   - kafka
   - operators/apicurio
   - argocd
+  - flink
+  - flink-jobs
+  - applications/data-consumer

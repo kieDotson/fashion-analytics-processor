@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-taskmanager
+  namespace: fashion-analytics
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flink
+      component: taskmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: taskmanager
+    spec:
+      containers:
+      - name: taskmanager
+        image: apache/flink:1.18
+        workingDir: /opt/flink
+        command: ["/bin/bash", "-c", "$FLINK_HOME/bin/taskmanager.sh start; while :; do sleep 10; done"]
+        ports:
+        - containerPort: 6122
+          name: rpc
+        livenessProbe:
+          tcpSocket:
+            port: 6122
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf/
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+          items:
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+          - key: log4j-console.properties
+            path: log4j-console.properties

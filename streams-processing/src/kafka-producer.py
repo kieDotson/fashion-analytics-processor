@@ -14,7 +14,7 @@ fake = Faker()
 
 # Kafka Producer Setup
 producer = KafkaProducer(
-    bootstrap_servers='kafka.default.svc.cluster.local:30093',  # Update with your Kafka broker's address
+    bootstrap_servers='fashion-kafka-kafka-bootstrap.fashion-analytics.svc:9092',  # Update with your Kafka broker's address
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),  # Serialize JSON messages
     api_version=(3, 9, 0)
 )

@@ -1,0 +1,34 @@
+FROM maven:3.8-openjdk-11 AS builder
+
+WORKDIR /app
+
+# Copy the POM file
+COPY pom.xml .
+
+# Copy source code
+COPY src/ ./src/
+
+# Build the application
+RUN mvn clean package
+
+FROM apache/flink:1.18
+
+# Copy the JAR file from the builder stage
+COPY --from=builder /app/target/fashion-analytics-processor-1.0-SNAPSHOT.jar /opt/flink/usrlib/fashion-analytics-processor-1.0-SNAPSHOT.jar
+
+# Set environment variables
+ENV FLINK_HOME=/opt/flink
+ENV PATH=$PATH:$FLINK_HOME/bin
+
+# Create log directory
+RUN mkdir -p $FLINK_HOME/log
+
+# Copy additional configuration if needed
+# COPY flink-conf.yaml $FLINK_HOME/conf/
+
+# Set the working directory
+WORKDIR $FLINK_HOME
+
+# The container will run the JobManager by default 
+# but can be overridden to run the TaskManager or submit a job
+CMD ["bash", "-c", "bin/jobmanager.sh start-foreground"]
