@@ -116,6 +116,11 @@ deploy-with-argocd: setup-argocd ## Deploy using ArgoCD for local GitOps testing
 	@echo "Deploying Apicurio Registry using ArgoCD..."
 	kubectl apply -f infrastructure/kubernetes/argocd/applications/apicurio-operator.yaml
 	kubectl apply -f infrastructure/kubernetes/argocd/applications/apicurio-instance.yaml
+	kubectl apply -f infrastructure/kubernetes/argocd/applications/data-consumer.yaml
+	kubectl apply -f infrastructure/kubernetes/argocd/applications/data-generator.yaml
+	kubectl apply -f infrastructure/kubernetes/argocd/applications/flink.yaml
+	kubectl apply -f infrastructure/kubernetes/argocd/applications/kafka-cluster.yaml
+	kubectl apply -f infrastructure/kubernetes/argocd/applications/kafka-operator.yaml
 	@echo "ArgoCD applications created. Check status with:"
 	@echo "kubectl get applications -n argocd"
 

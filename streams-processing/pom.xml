@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flink.version>1.18.0</flink.version>
+        <flink.version>1.20.0</flink.version>
         <java.version>11</java.version>
         <scala.binary.version>2.12</scala.binary.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -32,11 +32,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Flink Connector API (for Sink interfaces) -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
         <!-- Kafka connector for Flink -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
-            <version>${flink.version}</version>
+            <version>3.3.0-1.20</version>
         </dependency>
 
         <!-- JSON processing -->
@@ -100,7 +107,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>flink.fashion-analytics-processor</mainClass>
+                                    <mainClass>flink.FashionAnalyticsProcessor</mainClass>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
